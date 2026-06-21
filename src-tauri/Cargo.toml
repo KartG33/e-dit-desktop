@@ -1,0 +1,20 @@
+[package]
+name = "e-dit"
+version = "1.0.0"
+description = "Профессиональный инструмент для форматирования и редактирования текста"
+authors = ["you"]
+license = ""
+repository = ""
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+tauri = { version = "1.5", features = ["dialog-all", "fs-all", "clipboard-all"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
