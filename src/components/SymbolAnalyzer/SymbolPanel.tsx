@@ -49,7 +49,7 @@ export const SymbolPanel: React.FC<Props> = ({ text }) => {
     return Object.entries(counts)
       .map(([symbol, count]) => ({ symbol, count }))
       .sort((a, b) => b.count - a.count);
-  }, [text]);
+  }, [debouncedText]);
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     if (scrollRef.current && e.deltaY !== 0) {
