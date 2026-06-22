@@ -6,6 +6,8 @@ export function useEditor(initialValue = '', editorId = 'main') {
   const [past, setPast] = useState<string[]>([]);
   const [future, setFuture] = useState<string[]>([]);
   
+  const [debouncedText, setDebouncedText] = useState(initialValue);
+  
   const maxHistorySize = 100;
   
   const lastSavedTextRef = useRef(initialValue);
@@ -18,15 +20,25 @@ export function useEditor(initialValue = '', editorId = 'main') {
       const setting = await db.settings.where('key').equals(`editor_${editorId}`).first();
       if (setting && setting.value) {
         setTextState(setting.value);
+        setDebouncedText(setting.value);
         lastSavedTextRef.current = setting.value;
       } else if (initialValue) {
         setTextState(initialValue);
+        setDebouncedText(initialValue);
         lastSavedTextRef.current = initialValue;
       }
       isInitializedRef.current = true;
     };
     loadSession();
   }, [editorId, initialValue]);
+
+  // Debounce text changes for heavy statistics calculation
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedText(text);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [text]);
 
   // Save to DB on text change
   useEffect(() => {
@@ -111,11 +123,11 @@ export function useEditor(initialValue = '', editorId = 'main') {
 
   const stats = {
     chars: text.length,
-    charsNoSpaces: text.replace(/\s/g, '').length,
-    words: text.trim() ? text.trim().split(/\s+/).length : 0,
-    sentences: (text.match(/[.!?]+/g) || []).length,
-    paragraphs: text.split(/\n\s*\n/).filter(p => p.trim()).length,
-    lines: text.split('\n').length
+    charsNoSpaces: debouncedText.replace(/\s/g, '').length,
+    words: debouncedText.trim() ? debouncedText.trim().split(/\s+/).length : 0,
+    sentences: (debouncedText.match(/[.!?]+/g) || []).length,
+    paragraphs: debouncedText.split(/\n\s*\n/).filter(p => p.trim()).length,
+    lines: debouncedText.split('\n').length
   };
 
   const clear = useCallback(() => {

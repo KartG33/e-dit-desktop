@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 
 interface Props { text: string }
@@ -7,10 +7,19 @@ export const SymbolPanel: React.FC<Props> = ({ text }) => {
   const isMobile = false;
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const [debouncedText, setDebouncedText] = useState(text);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedText(text);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [text]);
+
   const symbols = useMemo(() => {
-    if (!text) return [];
+    if (!debouncedText) return [];
     const counts: Record<string, number> = {};
-    let remainingText = text;
+    let remainingText = debouncedText;
 
     const numberedListMatches = remainingText.match(/(?:^|\n)\s*\d+\./g);
     if (numberedListMatches) {
