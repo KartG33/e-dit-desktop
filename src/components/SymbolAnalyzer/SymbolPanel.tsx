@@ -1,9 +1,13 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
+import { symbolCommands } from '../../lib/commands/symbols';
 
-interface Props { text: string }
+interface Props {
+  text: string;
+  onCommand: (fn: (text: string) => string) => void;
+}
 
-export const SymbolPanel: React.FC<Props> = ({ text }) => {
+export const SymbolPanel: React.FC<Props> = ({ text, onCommand }) => {
   const isMobile = false;
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -51,6 +55,13 @@ export const SymbolPanel: React.FC<Props> = ({ text }) => {
       .sort((a, b) => b.count - a.count);
   }, [debouncedText]);
 
+  const handleSymbolClick = (symbol: string) => {
+    const cmd = symbolCommands.find(c => c.id === `remove-symbol-${symbol}`);
+    if (cmd && typeof cmd.execute === 'function') {
+      onCommand(cmd.execute);
+    }
+  };
+
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     if (scrollRef.current && e.deltaY !== 0) {
       scrollRef.current.scrollLeft += e.deltaY;
@@ -81,10 +92,11 @@ export const SymbolPanel: React.FC<Props> = ({ text }) => {
         {symbols.map(({ symbol, count }) => (
           <button
             key={symbol}
-            className="flex items-center gap-2 px-3 py-1.5 glass-button rounded-lg text-xs text-blue-200 whitespace-nowrap shrink-0"
+            onClick={() => handleSymbolClick(symbol)}
+            title={`Удалить все символы "${symbol}" (встречается: ${count})`}
+            className="flex items-center justify-center px-3 py-1.5 glass-button rounded-lg text-xs text-blue-200 whitespace-nowrap shrink-0 font-mono font-medium"
           >
-            <span className="font-mono font-medium">{symbol}</span>
-            <span className="bg-black/30 text-blue-300/70 px-1.5 py-0.5 rounded text-[10px] shadow-inner">{count}</span>
+            {symbol}
           </button>
         ))}
       </div>

@@ -39,7 +39,7 @@ function App() {
         {activeTab === 'presets' && <PresetsTab onCommand={activeEditor.applyCommand} />}
       </div>
 
-      <SymbolPanel text={activeEditor.text} />
+      <SymbolPanel text={activeEditor.text} onCommand={activeEditor.applyCommand} />
 
       <Workspace
         leftEditor={leftEditor}
