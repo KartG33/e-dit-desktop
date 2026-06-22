@@ -1,5 +1,5 @@
 import React from 'react';
-import { Undo, Redo, Trash2, Copy, ClipboardPaste } from 'lucide-react';
+import { Undo, Redo, Trash2, Copy, ClipboardPaste, Save, FolderOpen } from 'lucide-react';
 
 interface EditorToolbarProps {
   onUndo: () => void;
@@ -9,6 +9,8 @@ interface EditorToolbarProps {
   onClear: () => void;
   text: string;
   className?: string;
+  onSave?: () => void;
+  onOpen?: () => void;
 }
 
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({
@@ -18,7 +20,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   canRedo,
   onClear,
   text,
-  className = "absolute bottom-6 left-1/2 -translate-x-1/2"
+  className = "absolute bottom-6 left-1/2 -translate-x-1/2",
+  onSave,
+  onOpen
 }) => {
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -54,6 +58,28 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       >
         <Redo size={18} />
       </button>
+
+      <div className="w-px h-6 bg-white/10 mx-1" />
+
+      {onOpen && (
+        <button
+          onClick={onOpen}
+          className="p-2.5 rounded-xl transition-all duration-200 hover:bg-white/10 text-gray-300"
+          title="Открыть файл (Ctrl+O)"
+        >
+          <FolderOpen size={18} />
+        </button>
+      )}
+
+      {onSave && (
+        <button
+          onClick={onSave}
+          className="p-2.5 rounded-xl transition-all duration-200 hover:bg-white/10 text-gray-300"
+          title="Сохранить файл (Ctrl+S)"
+        >
+          <Save size={18} />
+        </button>
+      )}
 
       <div className="w-px h-6 bg-white/10 mx-1" />
 

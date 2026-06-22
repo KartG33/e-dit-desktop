@@ -6,13 +6,17 @@ interface SplitViewProps {
   rightEditor: any;
   activePane: 'left' | 'right';
   setActivePane: (pane: 'left' | 'right') => void;
+  onSave?: (editor: any) => void;
+  onOpen?: (editor: any) => void;
 }
 
 export const SplitView: React.FC<SplitViewProps> = ({
   leftEditor,
   rightEditor,
   activePane,
-  setActivePane
+  setActivePane,
+  onSave,
+  onOpen
 }) => {
   return (
     <div className="flex-1 flex overflow-hidden">
@@ -23,6 +27,22 @@ export const SplitView: React.FC<SplitViewProps> = ({
           isActive={activePane === 'left'}
           onClick={() => setActivePane('left')}
           placeholder="Левая колонка (нажмите для редактирования)..."
+          onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+              e.preventDefault();
+              if (e.shiftKey) leftEditor.redo();
+              else leftEditor.undo();
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+              e.preventDefault();
+              leftEditor.redo();
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+              e.preventDefault();
+              if (onSave) onSave(leftEditor);
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') {
+              e.preventDefault();
+              if (onOpen) onOpen(leftEditor);
+            }
+          }}
         />
       </div>
       <div className="flex-1 flex flex-col">
@@ -32,6 +52,22 @@ export const SplitView: React.FC<SplitViewProps> = ({
           isActive={activePane === 'right'}
           onClick={() => setActivePane('right')}
           placeholder="Правая колонка (нажмите для редактирования)..."
+          onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+              e.preventDefault();
+              if (e.shiftKey) rightEditor.redo();
+              else rightEditor.undo();
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+              e.preventDefault();
+              rightEditor.redo();
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+              e.preventDefault();
+              if (onSave) onSave(rightEditor);
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') {
+              e.preventDefault();
+              if (onOpen) onOpen(rightEditor);
+            }
+          }}
         />
       </div>
     </div>

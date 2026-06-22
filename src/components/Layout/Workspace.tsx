@@ -4,6 +4,8 @@ import { TextEditor } from '../Editor/TextEditor';
 import { EditorToolbar } from '../Editor/EditorToolbar';
 import { NotesSidebar } from '../Notes/NotesSidebar';
 import { useEditor } from '../../hooks/useEditor';
+import { open, save } from '@tauri-apps/api/dialog';
+import { readTextFile, writeTextFile } from '@tauri-apps/api/fs';
 
 type EditorInstance = ReturnType<typeof useEditor>;
 
@@ -28,6 +30,34 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   showNotes,
   setShowNotes
 }) => {
+  const handleOpenFile = async (editor: EditorInstance) => {
+    try {
+      const selected = await open({
+        multiple: false,
+        filters: [{ name: 'Text', extensions: ['txt', 'md', 'lyrics'] }]
+      });
+      if (selected && typeof selected === 'string') {
+        const content = await readTextFile(selected);
+        editor.setText(content);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSaveFile = async (editor: EditorInstance) => {
+    try {
+      const filePath = await save({
+        filters: [{ name: 'Text', extensions: ['txt', 'md', 'lyrics'] }]
+      });
+      if (filePath) {
+        await writeTextFile(filePath, editor.text);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <div className="flex-1 flex overflow-hidden">
       {/* Editor Area */}
@@ -38,12 +68,30 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             rightEditor={rightEditor}
             activePane={activePane}
             setActivePane={setActivePane}
+            onOpen={handleOpenFile}
+            onSave={handleSaveFile}
           />
         ) : (
           <TextEditor
             value={leftEditor.text}
             onChange={leftEditor.setText}
             placeholder="Введите или вставьте текст..."
+            onKeyDown={(e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                if (e.shiftKey) leftEditor.redo();
+                else leftEditor.undo();
+              } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+                e.preventDefault();
+                leftEditor.redo();
+              } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                handleSaveFile(leftEditor);
+              } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') {
+                e.preventDefault();
+                handleOpenFile(leftEditor);
+              }
+            }}
           />
         )}
         
@@ -54,6 +102,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           canRedo={activeEditor.canRedo}
           onClear={activeEditor.clear}
           text={activeEditor.text}
+          onOpen={() => handleOpenFile(activeEditor)}
+          onSave={() => handleSaveFile(activeEditor)}
         />
       </div>
 

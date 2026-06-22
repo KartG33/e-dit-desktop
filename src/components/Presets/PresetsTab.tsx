@@ -97,12 +97,12 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
         <div className="flex flex-col gap-3 mt-2 pb-2">
           <div>
             <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Базовые команды</div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex overflow-x-auto pb-1.5 gap-1.5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               {basicCommands.map(cmd => (
                 <button
                   key={cmd.id}
                   onClick={() => setSelectedIds(prev => [...prev, cmd.id])}
-                  className="glass-button px-3 py-1.5 rounded-lg text-sm text-gray-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="shrink-0 glass-button px-3 py-1.5 rounded-lg text-sm text-gray-300 transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   + {cmd.name}
                 </button>
@@ -112,12 +112,12 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
           
           <div>
             <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Suno команды</div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex overflow-x-auto pb-1.5 gap-1.5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               {sunoCommands.map(cmd => (
                 <button
                   key={cmd.id}
                   onClick={() => setSelectedIds(prev => [...prev, cmd.id])}
-                  className="glass-button px-3 py-1.5 rounded-lg text-sm text-gray-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="shrink-0 glass-button px-3 py-1.5 rounded-lg text-sm text-gray-300 transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   + {cmd.name}
                 </button>
@@ -127,13 +127,13 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
 
           <div>
             <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Удаление символов</div>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex overflow-x-auto pb-1.5 gap-1.5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               {symbolCommands.map(cmd => (
                 <button
                   key={cmd.id}
                   onClick={() => setSelectedIds(prev => [...prev, cmd.id])}
                   title={cmd.name}
-                  className="w-8 h-8 flex items-center justify-center glass-button rounded-lg text-sm text-gray-300 transform hover:scale-[1.05] active:scale-[0.95] font-mono"
+                  className="shrink-0 min-w-[2rem] h-8 px-1.5 flex items-center justify-center glass-button rounded-lg text-sm text-gray-300 transform hover:scale-[1.05] active:scale-[0.95] font-mono"
                 >
                   {cmd.id.replace('remove-symbol-', '')}
                 </button>
