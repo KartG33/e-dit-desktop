@@ -3,7 +3,7 @@ import { Columns, Maximize, FileText, Sliders } from 'lucide-react';
 import { TabButton } from '../UI/TabButton';
 import { IconButton } from '../UI/IconButton';
 
-export type TabType = 'basic' | 'suno' | 'presets';
+export type TabType = 'basic' | 'suno' | 'presets' | 'favorites';
 
 interface HeaderProps {
   activeTab: TabType;
@@ -15,6 +15,8 @@ interface HeaderProps {
   setSplitMode: (split: boolean) => void;
   showPresetsModal: boolean;
   setShowPresetsModal: (show: boolean) => void;
+  defaultTab: TabType;
+  onSetDefaultTab: (tab: TabType) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,7 +28,9 @@ export const Header: React.FC<HeaderProps> = ({
   splitMode,
   setSplitMode,
   showPresetsModal,
-  setShowPresetsModal
+  setShowPresetsModal,
+  defaultTab,
+  onSetDefaultTab
 }) => {
   return (
     <header className="flex items-end justify-between px-4 pt-2 glass-panel border-b border-white/5 z-20 shadow-lg shrink-0">
@@ -39,16 +43,29 @@ export const Header: React.FC<HeaderProps> = ({
             label="Команды" 
             isActive={activeTab === 'basic'} 
             onClick={() => setActiveTab('basic')} 
+            isDefault={defaultTab === 'basic'}
+            onSetDefault={() => onSetDefaultTab('basic')}
           />
           <TabButton 
             label="Suno" 
             isActive={activeTab === 'suno'} 
             onClick={() => setActiveTab('suno')} 
+            isDefault={defaultTab === 'suno'}
+            onSetDefault={() => onSetDefaultTab('suno')}
           />
           <TabButton 
             label="Пресеты" 
             isActive={activeTab === 'presets'} 
             onClick={() => setActiveTab('presets')} 
+            isDefault={defaultTab === 'presets'}
+            onSetDefault={() => onSetDefaultTab('presets')}
+          />
+          <TabButton 
+            label="Избранное" 
+            isActive={activeTab === 'favorites'} 
+            onClick={() => setActiveTab('favorites')} 
+            isDefault={defaultTab === 'favorites'}
+            onSetDefault={() => onSetDefaultTab('favorites')}
           />
         </div>
       </div>

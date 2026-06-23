@@ -4,9 +4,15 @@ import { CommandButton } from './CommandButton';
 
 interface BasicCommandsProps {
   onCommand: (fn: (text: string) => string) => void;
+  favoriteCommandIds: string[];
+  onToggleFavoriteCommand: (id: string) => void;
 }
 
-export const BasicCommands: React.FC<BasicCommandsProps> = ({ onCommand }) => {
+export const BasicCommands: React.FC<BasicCommandsProps> = ({ 
+  onCommand,
+  favoriteCommandIds,
+  onToggleFavoriteCommand
+}) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -26,6 +32,8 @@ export const BasicCommands: React.FC<BasicCommandsProps> = ({ onCommand }) => {
           key={cmd.id}
           command={cmd}
           onClick={() => onCommand(cmd.execute)}
+          isFavorited={favoriteCommandIds.includes(cmd.id)}
+          onToggleFavorite={() => onToggleFavoriteCommand(cmd.id)}
         />
       ))}
     </div>

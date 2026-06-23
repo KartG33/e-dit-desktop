@@ -6,9 +6,17 @@ interface PresetsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCommand: (fn: (text: string) => string) => void;
+  favoritePresetIds?: number[];
+  onToggleFavoritePreset?: (id: number) => void;
 }
 
-export const PresetsModal: React.FC<PresetsModalProps> = ({ isOpen, onClose, onCommand }) => {
+export const PresetsModal: React.FC<PresetsModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onCommand,
+  favoritePresetIds = [],
+  onToggleFavoritePreset
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -33,7 +41,11 @@ export const PresetsModal: React.FC<PresetsModalProps> = ({ isOpen, onClose, onC
 
         {/* Modal Content */}
         <div className="flex-1 overflow-y-auto pt-4 pr-1">
-          <PresetsTab onCommand={onCommand} />
+          <PresetsTab 
+            onCommand={onCommand} 
+            favoritePresetIds={favoritePresetIds}
+            onToggleFavoritePreset={onToggleFavoritePreset}
+          />
         </div>
       </div>
     </div>

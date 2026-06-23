@@ -5,10 +5,12 @@ import { basicCommands } from '../../lib/commands/basic';
 import { sunoCommands } from '../../lib/commands/suno';
 import { symbolCommands } from '../../lib/commands/symbols';
 import { Command } from '../../lib/commands/types';
-import { Plus, Check, X, ArrowRight, Edit, Trash2 } from 'lucide-react';
+import { Plus, Check, X, ArrowRight, Edit, Trash2, Star } from 'lucide-react';
 
 interface Props {
   onCommand: (fn: (text: string) => string) => void;
+  favoritePresetIds?: number[];
+  onToggleFavoritePreset?: (id: number) => void;
 }
 
 const allCommandsList = [...basicCommands, ...sunoCommands, ...symbolCommands];
@@ -17,7 +19,11 @@ const allCommandsMap = allCommandsList.reduce((acc, cmd) => {
   return acc;
 }, {} as Record<string, Command>);
 
-export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
+export const PresetsTab: React.FC<Props> = ({ 
+  onCommand,
+  favoritePresetIds = [],
+  onToggleFavoritePreset
+}) => {
   const presets = useLiveQuery(() => db.presets.filter(p => p.type === 'chain').toArray());
   const [isCreating, setIsCreating] = useState(false);
   const [editingPresetId, setEditingPresetId] = useState<number | null>(null);
@@ -85,7 +91,7 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
 
   if (isCreating) {
     return (
-      <div className="flex flex-col gap-3 p-2 text-sm max-h-[300px] overflow-y-auto">
+      <div className="flex flex-col gap-3 p-2 text-sm max-h-[60vh] overflow-y-auto scrollbar-hide">
         <div className="flex gap-2 items-center">
           <input
             className="flex-1 bg-white/5 border border-white/10 px-4 py-2 rounded-xl outline-none focus:border-blue-500/50 focus:bg-white/10 text-gray-200 transition-all placeholder-gray-500"
@@ -128,12 +134,12 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
         <div className="flex flex-col gap-3 mt-2 pb-2">
           <div>
             <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Базовые команды</div>
-            <div className="flex overflow-x-auto pb-1.5 gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
               {basicCommands.map(cmd => (
                 <button
                   key={cmd.id}
                   onClick={() => setSelectedIds(prev => [...prev, cmd.id])}
-                  className="shrink-0 glass-button px-3 py-1.5 rounded-lg text-sm text-gray-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="glass-button px-3 py-1.5 rounded-lg text-sm text-gray-300 transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   + {cmd.name}
                 </button>
@@ -143,12 +149,12 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
           
           <div>
             <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Suno команды</div>
-            <div className="flex overflow-x-auto pb-1.5 gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
               {sunoCommands.map(cmd => (
                 <button
                   key={cmd.id}
                   onClick={() => setSelectedIds(prev => [...prev, cmd.id])}
-                  className="shrink-0 glass-button px-3 py-1.5 rounded-lg text-sm text-gray-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="glass-button px-3 py-1.5 rounded-lg text-sm text-gray-300 transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   + {cmd.name}
                 </button>
@@ -158,13 +164,13 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
 
           <div>
             <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Удаление символов</div>
-            <div className="flex overflow-x-auto pb-1.5 gap-1.5 font-mono">
+            <div className="flex flex-wrap gap-1.5 font-mono">
               {symbolCommands.map(cmd => (
                 <button
                   key={cmd.id}
                   onClick={() => setSelectedIds(prev => [...prev, cmd.id])}
                   title={cmd.name}
-                  className="shrink-0 min-w-[2rem] h-8 px-1.5 flex items-center justify-center glass-button rounded-lg text-sm text-gray-300 transform hover:scale-[1.05] active:scale-[0.95]"
+                  className="min-w-[2rem] h-8 px-1.5 flex items-center justify-center glass-button rounded-lg text-sm text-gray-300 transform hover:scale-[1.05] active:scale-[0.95]"
                 >
                   {cmd.id.replace('remove-symbol-', '')}
                 </button>
@@ -185,7 +191,7 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
       {presets?.map(preset => (
         <div 
           key={preset.id} 
-          className="flex items-center gap-1 bg-white/5 border border-white/10 hover:border-white/20 rounded-xl px-3 py-1.5 transition-all shadow-sm"
+          className="flex items-center gap-1 bg-white/5 border border-white/10 hover:border-white/20 rounded-xl px-3 py-1.5 transition-all shadow-sm group"
         >
           <button
             onClick={() => handleExecute(preset)}
@@ -194,6 +200,20 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
           >
             {preset.name}
           </button>
+
+          {onToggleFavoritePreset && (
+            <button
+              onClick={() => onToggleFavoritePreset(preset.id!)}
+              className={`p-1 transition-all duration-200 ${
+                favoritePresetIds.includes(preset.id!)
+                  ? 'text-yellow-400 opacity-100'
+                  : 'text-gray-500 hover:text-yellow-300 opacity-0 group-hover:opacity-100'
+              }`}
+              title={favoritePresetIds.includes(preset.id!) ? 'Убрать из избранного' : 'Добавить в избранное'}
+            >
+              <Star size={14} fill={favoritePresetIds.includes(preset.id!) ? 'currentColor' : 'none'} />
+            </button>
+          )}
           
           <button
             onClick={() => handleStartEdit(preset)}
