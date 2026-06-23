@@ -8,6 +8,8 @@ interface SplitViewProps {
   setActivePane: (pane: 'left' | 'right') => void;
   onSave?: (editor: any) => void;
   onOpen?: (editor: any) => void;
+  leftTextareaRef?: React.RefObject<HTMLTextAreaElement>;
+  rightTextareaRef?: React.RefObject<HTMLTextAreaElement>;
 }
 
 export const SplitView: React.FC<SplitViewProps> = ({
@@ -16,7 +18,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
   activePane,
   setActivePane,
   onSave,
-  onOpen
+  onOpen,
+  leftTextareaRef,
+  rightTextareaRef
 }) => {
   return (
     <div className="flex-1 flex overflow-hidden">
@@ -27,6 +31,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
           isActive={activePane === 'left'}
           onClick={() => setActivePane('left')}
           placeholder="Левая колонка (нажмите для редактирования)..."
+          textareaRef={leftTextareaRef}
           onKeyDown={(e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
               e.preventDefault();
@@ -52,6 +57,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
           isActive={activePane === 'right'}
           onClick={() => setActivePane('right')}
           placeholder="Правая колонка (нажмите для редактирования)..."
+          textareaRef={rightTextareaRef}
           onKeyDown={(e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
               e.preventDefault();

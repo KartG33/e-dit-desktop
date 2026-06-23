@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 
 interface TextEditorProps {
   value: string;
@@ -8,6 +8,7 @@ interface TextEditorProps {
   onClick?: () => void;
   className?: string;
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  textareaRef?: React.RefObject<HTMLTextAreaElement>;
 }
 
 export const TextEditor: React.FC<TextEditorProps> = ({ 
@@ -17,10 +18,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   isActive = true,
   onClick,
   className = '',
-  onKeyDown
+  onKeyDown,
+  textareaRef
 }) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
   return (
     <div 
       className={`flex-1 flex flex-col w-full h-full cursor-text ${isActive ? '' : 'opacity-90 grayscale-[20%]'} ${className}`} 

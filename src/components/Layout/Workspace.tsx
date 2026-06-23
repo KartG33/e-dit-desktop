@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { SplitView } from '../Editor/SplitView';
 import { TextEditor } from '../Editor/TextEditor';
 import { EditorToolbar } from '../Editor/EditorToolbar';
@@ -30,6 +30,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   showNotes,
   setShowNotes
 }) => {
+  const leftTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const rightTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const activeTextareaRef = splitMode 
+    ? (activePane === 'left' ? leftTextareaRef : rightTextareaRef)
+    : leftTextareaRef;
+
   const handleOpenFile = async (editor: EditorInstance) => {
     try {
       const selected = await open({
@@ -58,6 +65,34 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     }
   };
 
+  const handlePaste = async () => {
+    try {
+      const clipText = await navigator.clipboard.readText();
+      if (!clipText) return;
+      
+      const textarea = activeTextareaRef.current;
+      if (textarea) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const before = text.substring(0, start);
+        const after = text.substring(end, text.length);
+        
+        activeEditor.setText(before + clipText + after);
+        
+        setTimeout(() => {
+          textarea.focus();
+          const nextCursor = start + clipText.length;
+          textarea.setSelectionRange(nextCursor, nextCursor);
+        }, 0);
+      } else {
+        activeEditor.setText(activeEditor.text + clipText);
+      }
+    } catch (err) {
+      console.error('Failed to read clipboard contents: ', err);
+    }
+  };
+
   return (
     <div className="flex-1 flex overflow-hidden">
       {/* Editor Area */}
@@ -70,12 +105,15 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             setActivePane={setActivePane}
             onOpen={handleOpenFile}
             onSave={handleSaveFile}
+            leftTextareaRef={leftTextareaRef}
+            rightTextareaRef={rightTextareaRef}
           />
         ) : (
           <TextEditor
             value={leftEditor.text}
             onChange={leftEditor.setText}
             placeholder="Введите или вставьте текст..."
+            textareaRef={leftTextareaRef}
             onKeyDown={(e) => {
               if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
                 e.preventDefault();
@@ -104,6 +142,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           text={activeEditor.text}
           onOpen={() => handleOpenFile(activeEditor)}
           onSave={() => handleSaveFile(activeEditor)}
+          onPaste={handlePaste}
         />
       </div>
 

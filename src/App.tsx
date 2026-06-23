@@ -3,6 +3,7 @@ import { useEditor } from './hooks/useEditor';
 import { BasicCommands } from './components/Commands/BasicCommands';
 import { SunoCommands } from './components/Commands/SunoCommands';
 import { PresetsTab } from './components/Presets/PresetsTab';
+import { PresetsModal } from './components/Presets/PresetsModal';
 import { SymbolPanel } from './components/SymbolAnalyzer/SymbolPanel';
 import { Header, TabType } from './components/Layout/Header';
 import { Workspace } from './components/Layout/Workspace';
@@ -13,6 +14,7 @@ function App() {
   const [activePane, setActivePane] = useState<'left' | 'right'>('left');
   const [splitMode, setSplitMode] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [showPresetsModal, setShowPresetsModal] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('basic');
 
   const activeEditor = splitMode 
@@ -29,6 +31,8 @@ function App() {
         setShowNotes={setShowNotes}
         splitMode={splitMode}
         setSplitMode={setSplitMode}
+        showPresetsModal={showPresetsModal}
+        setShowPresetsModal={setShowPresetsModal}
       />
 
       {/* Commands Content Panel */}
@@ -50,6 +54,12 @@ function App() {
         splitMode={splitMode}
         showNotes={showNotes}
         setShowNotes={setShowNotes}
+      />
+
+      <PresetsModal
+        isOpen={showPresetsModal}
+        onClose={() => setShowPresetsModal(false)}
+        onCommand={activeEditor.applyCommand}
       />
     </div>
   );

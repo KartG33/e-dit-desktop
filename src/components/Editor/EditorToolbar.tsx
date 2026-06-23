@@ -11,6 +11,7 @@ interface EditorToolbarProps {
   className?: string;
   onSave?: () => void;
   onOpen?: () => void;
+  onPaste?: () => void;
 }
 
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({
@@ -22,20 +23,23 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   text,
   className = "absolute bottom-6 left-1/2 -translate-x-1/2",
   onSave,
-  onOpen
+  onOpen,
+  onPaste
 }) => {
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
   };
 
   const handlePaste = async () => {
-    try {
-      const clipText = await navigator.clipboard.readText();
-      // To implement full paste with cursor position, we'd need a ref to the textarea
-      // For now, this just logs since setText is from parent but we don't have direct insert
-      console.log('Clipboard content:', clipText);
-    } catch (err) {
-      console.error('Failed to read clipboard contents: ', err);
+    if (onPaste) {
+      onPaste();
+    } else {
+      try {
+        const clipText = await navigator.clipboard.readText();
+        console.log('Clipboard content:', clipText);
+      } catch (err) {
+        console.error('Failed to read clipboard contents: ', err);
+      }
     }
   };
 

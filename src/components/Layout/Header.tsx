@@ -1,5 +1,5 @@
 import React from 'react';
-import { Columns, Maximize, FileText } from 'lucide-react';
+import { Columns, Maximize, FileText, Sliders } from 'lucide-react';
 import { TabButton } from '../UI/TabButton';
 import { IconButton } from '../UI/IconButton';
 
@@ -13,6 +13,8 @@ interface HeaderProps {
   setShowNotes: (show: boolean) => void;
   splitMode: boolean;
   setSplitMode: (split: boolean) => void;
+  showPresetsModal: boolean;
+  setShowPresetsModal: (show: boolean) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,7 +24,9 @@ export const Header: React.FC<HeaderProps> = ({
   showNotes,
   setShowNotes,
   splitMode,
-  setSplitMode
+  setSplitMode,
+  showPresetsModal,
+  setShowPresetsModal
 }) => {
   return (
     <header className="flex items-end justify-between px-4 pt-2 glass-panel border-b border-white/5 z-20 shadow-lg shrink-0">
@@ -58,6 +62,12 @@ export const Header: React.FC<HeaderProps> = ({
           isActive={showNotes}
           onClick={() => setShowNotes(!showNotes)}
           title="Заметки"
+        />
+        <IconButton
+          icon={<Sliders size={16} />}
+          isActive={showPresetsModal}
+          onClick={() => setShowPresetsModal(!showPresetsModal)}
+          title="Пресеты"
         />
         <IconButton
           icon={splitMode ? <Maximize size={16} /> : <Columns size={16} />}

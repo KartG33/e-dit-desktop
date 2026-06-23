@@ -5,7 +5,7 @@ import { basicCommands } from '../../lib/commands/basic';
 import { sunoCommands } from '../../lib/commands/suno';
 import { symbolCommands } from '../../lib/commands/symbols';
 import { Command } from '../../lib/commands/types';
-import { Plus, Check, X, ArrowRight } from 'lucide-react';
+import { Plus, Check, X, ArrowRight, Edit, Trash2 } from 'lucide-react';
 
 interface Props {
   onCommand: (fn: (text: string) => string) => void;
@@ -20,6 +20,7 @@ const allCommandsMap = allCommandsList.reduce((acc, cmd) => {
 export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
   const presets = useLiveQuery(() => db.presets.filter(p => p.type === 'chain').toArray());
   const [isCreating, setIsCreating] = useState(false);
+  const [editingPresetId, setEditingPresetId] = useState<number | null>(null);
   const [newPresetName, setNewPresetName] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -43,13 +44,37 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
   const handleSave = async () => {
     if (selectedIds.length === 0) return;
     const finalName = newPresetName.trim() || `Мой пресет ${presets ? presets.length + 1 : 1}`;
-    await db.presets.add({
-      name: finalName,
-      type: 'chain',
-      commandIds: selectedIds,
-      createdAt: Date.now()
-    });
+    
+    if (editingPresetId !== null) {
+      await db.presets.update(editingPresetId, {
+        name: finalName,
+        commandIds: selectedIds
+      });
+      setEditingPresetId(null);
+    } else {
+      await db.presets.add({
+        name: finalName,
+        type: 'chain',
+        commandIds: selectedIds,
+        createdAt: Date.now()
+      });
+    }
+    
     setIsCreating(false);
+    setNewPresetName('');
+    setSelectedIds([]);
+  };
+
+  const handleStartEdit = (preset: Preset) => {
+    setEditingPresetId(preset.id!);
+    setNewPresetName(preset.name);
+    setSelectedIds(preset.commandIds || []);
+    setIsCreating(true);
+  };
+
+  const handleCancel = () => {
+    setIsCreating(false);
+    setEditingPresetId(null);
     setNewPresetName('');
     setSelectedIds([]);
   };
@@ -60,7 +85,7 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
 
   if (isCreating) {
     return (
-      <div className="flex flex-col gap-3 p-2 text-sm max-h-[300px] overflow-y-auto scrollbar-hide">
+      <div className="flex flex-col gap-3 p-2 text-sm max-h-[300px] overflow-y-auto">
         <div className="flex gap-2 items-center">
           <input
             className="flex-1 bg-white/5 border border-white/10 px-4 py-2 rounded-xl outline-none focus:border-blue-500/50 focus:bg-white/10 text-gray-200 transition-all placeholder-gray-500"
@@ -68,12 +93,18 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
             value={newPresetName}
             onChange={(e) => setNewPresetName(e.target.value)}
           />
-          <button onClick={handleSave} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded font-medium flex items-center gap-1 transition-colors"><Check size={16}/> Сохранить</button>
-          <button onClick={() => setIsCreating(false)} className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded flex items-center gap-1 transition-colors"><X size={16}/> Отмена</button>
+          <button onClick={handleSave} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded font-medium flex items-center gap-1 transition-colors">
+            <Check size={16}/> {editingPresetId !== null ? 'Сохранить' : 'Создать'}
+          </button>
+          <button onClick={handleCancel} className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded flex items-center gap-1 transition-colors">
+            <X size={16}/> Отмена
+          </button>
         </div>
         
         <div className="flex flex-col gap-1.5 mt-1">
-          <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Выбранная цепочка ({selectedIds.length})</div>
+          <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider">
+            Выбранная цепочка ({selectedIds.length})
+          </div>
           {selectedIds.length === 0 ? (
             <div className="text-gray-600 italic text-xs py-1">Кликните на команды ниже, чтобы добавить их в цепочку</div>
           ) : (
@@ -97,7 +128,7 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
         <div className="flex flex-col gap-3 mt-2 pb-2">
           <div>
             <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Базовые команды</div>
-            <div className="flex overflow-x-auto pb-1.5 gap-1.5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            <div className="flex overflow-x-auto pb-1.5 gap-1.5">
               {basicCommands.map(cmd => (
                 <button
                   key={cmd.id}
@@ -112,7 +143,7 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
           
           <div>
             <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Suno команды</div>
-            <div className="flex overflow-x-auto pb-1.5 gap-1.5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            <div className="flex overflow-x-auto pb-1.5 gap-1.5">
               {sunoCommands.map(cmd => (
                 <button
                   key={cmd.id}
@@ -127,13 +158,13 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
 
           <div>
             <div className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Удаление символов</div>
-            <div className="flex overflow-x-auto pb-1.5 gap-1.5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            <div className="flex overflow-x-auto pb-1.5 gap-1.5 font-mono">
               {symbolCommands.map(cmd => (
                 <button
                   key={cmd.id}
                   onClick={() => setSelectedIds(prev => [...prev, cmd.id])}
                   title={cmd.name}
-                  className="shrink-0 min-w-[2rem] h-8 px-1.5 flex items-center justify-center glass-button rounded-lg text-sm text-gray-300 transform hover:scale-[1.05] active:scale-[0.95] font-mono"
+                  className="shrink-0 min-w-[2rem] h-8 px-1.5 flex items-center justify-center glass-button rounded-lg text-sm text-gray-300 transform hover:scale-[1.05] active:scale-[0.95]"
                 >
                   {cmd.id.replace('remove-symbol-', '')}
                 </button>
@@ -152,20 +183,34 @@ export const PresetsTab: React.FC<Props> = ({ onCommand }) => {
       )}
 
       {presets?.map(preset => (
-        <button
-          key={preset.id}
-          onClick={() => handleExecute(preset)}
-          className="glass-button px-4 py-2 rounded-xl text-sm font-medium text-gray-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm"
-          title={`Цепочка: ${preset.commandIds?.map(id => allCommandsMap[id]?.name).join(' → ')}`}
-          onContextMenu={(e) => {
-            e.preventDefault();
-            if (window.confirm('Удалить этот пресет?')) {
-              handleDelete(preset.id!);
-            }
-          }}
+        <div 
+          key={preset.id} 
+          className="flex items-center gap-1 bg-white/5 border border-white/10 hover:border-white/20 rounded-xl px-3 py-1.5 transition-all shadow-sm"
         >
-          {preset.name}
-        </button>
+          <button
+            onClick={() => handleExecute(preset)}
+            className="text-sm font-medium text-gray-200 hover:text-white mr-1"
+            title={`Применить цепочку: ${preset.commandIds?.map(id => allCommandsMap[id]?.name || id).join(' → ')}`}
+          >
+            {preset.name}
+          </button>
+          
+          <button
+            onClick={() => handleStartEdit(preset)}
+            className="p-1 text-gray-500 hover:text-blue-400 rounded transition-colors"
+            title="Редактировать цепочку"
+          >
+            <Edit size={14} />
+          </button>
+
+          <button
+            onClick={() => handleDelete(preset.id!)}
+            className="p-1 text-gray-500 hover:text-red-400 rounded transition-colors"
+            title="Удалить пресет"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       ))}
       
       <button
