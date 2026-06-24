@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useEditor } from './hooks/useEditor';
 import { BasicCommands } from './components/Commands/BasicCommands';
 import { SunoCommands } from './components/Commands/SunoCommands';
@@ -52,26 +52,30 @@ function App() {
     loadSettings();
   }, []);
 
-  const handleSetDefaultTab = async (tab: TabType) => {
+  const handleSetDefaultTab = useCallback(async (tab: TabType) => {
     setDefaultTab(tab);
     await db.settings.put({ key: 'default_tab', value: tab });
-  };
+  }, []);
 
-  const handleToggleFavoriteCommand = async (id: string) => {
-    const updated = favoriteCommandIds.includes(id)
-      ? favoriteCommandIds.filter(x => x !== id)
-      : [...favoriteCommandIds, id];
-    setFavoriteCommandIds(updated);
-    await db.settings.put({ key: 'favorite_commands', value: updated });
-  };
+  const handleToggleFavoriteCommand = useCallback(async (id: string) => {
+    setFavoriteCommandIds(prev => {
+      const updated = prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : [...prev, id];
+      db.settings.put({ key: 'favorite_commands', value: updated });
+      return updated;
+    });
+  }, []);
 
-  const handleToggleFavoritePreset = async (id: number) => {
-    const updated = favoritePresetIds.includes(id)
-      ? favoritePresetIds.filter(x => x !== id)
-      : [...favoritePresetIds, id];
-    setFavoritePresetIds(updated);
-    await db.settings.put({ key: 'favorite_presets', value: updated });
-  };
+  const handleToggleFavoritePreset = useCallback(async (id: number) => {
+    setFavoritePresetIds(prev => {
+      const updated = prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : [...prev, id];
+      db.settings.put({ key: 'favorite_presets', value: updated });
+      return updated;
+    });
+  }, []);
 
   const activeEditor = splitMode 
     ? (activePane === 'left' ? leftEditor : rightEditor) 

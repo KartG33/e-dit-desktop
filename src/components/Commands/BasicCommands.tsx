@@ -8,7 +8,7 @@ interface BasicCommandsProps {
   onToggleFavoriteCommand: (id: string) => void;
 }
 
-export const BasicCommands: React.FC<BasicCommandsProps> = ({ 
+export const BasicCommands: React.FC<BasicCommandsProps> = React.memo(({ 
   onCommand,
   favoriteCommandIds,
   onToggleFavoriteCommand
@@ -38,4 +38,6 @@ export const BasicCommands: React.FC<BasicCommandsProps> = ({
       ))}
     </div>
   );
-};
+});
+
+BasicCommands.displayName = 'BasicCommands';

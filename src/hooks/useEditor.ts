@@ -7,12 +7,18 @@ export function useEditor(initialValue = '', editorId = 'main') {
   const [future, setFuture] = useState<string[]>([]);
   
   const [debouncedText, setDebouncedText] = useState(initialValue);
+  const textRef = useRef(initialValue);
   
   const maxHistorySize = 100;
   
   const lastSavedTextRef = useRef(initialValue);
   const debounceTimerRef = useRef<number | null>(null);
   const isInitializedRef = useRef(false);
+
+  // Sync textRef with live text state changes
+  useEffect(() => {
+    textRef.current = text;
+  }, [text]);
 
   // Load from DB on mount
   useEffect(() => {
@@ -22,10 +28,12 @@ export function useEditor(initialValue = '', editorId = 'main') {
         setTextState(setting.value);
         setDebouncedText(setting.value);
         lastSavedTextRef.current = setting.value;
+        textRef.current = setting.value;
       } else if (initialValue) {
         setTextState(initialValue);
         setDebouncedText(initialValue);
         lastSavedTextRef.current = initialValue;
+        textRef.current = initialValue;
       }
       isInitializedRef.current = true;
     };
@@ -109,17 +117,20 @@ export function useEditor(initialValue = '', editorId = 'main') {
     if (debounceTimerRef.current !== null) {
       window.clearTimeout(debounceTimerRef.current);
     }
-    if (lastSavedTextRef.current !== text) {
+    
+    const currentText = textRef.current;
+    if (lastSavedTextRef.current !== currentText) {
       saveToHistory(lastSavedTextRef.current);
     }
     
-    const newText = commandFn(text);
-    if (newText !== text) {
-      saveToHistory(text);
+    const newText = commandFn(currentText);
+    if (newText !== currentText) {
+      saveToHistory(currentText);
       lastSavedTextRef.current = newText;
       setTextState(newText);
+      textRef.current = newText;
     }
-  }, [text, saveToHistory]);
+  }, [saveToHistory]);
 
   const stats = {
     chars: text.length,

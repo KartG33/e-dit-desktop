@@ -8,7 +8,7 @@ interface SunoCommandsProps {
   onToggleFavoriteCommand: (id: string) => void;
 }
 
-export const SunoCommands: React.FC<SunoCommandsProps> = ({ 
+export const SunoCommands: React.FC<SunoCommandsProps> = React.memo(({ 
   onCommand,
   favoriteCommandIds,
   onToggleFavoriteCommand
@@ -38,4 +38,6 @@ export const SunoCommands: React.FC<SunoCommandsProps> = ({
       ))}
     </div>
   );
-};
+});
+
+SunoCommands.displayName = 'SunoCommands';

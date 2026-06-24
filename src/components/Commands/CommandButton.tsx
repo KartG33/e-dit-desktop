@@ -9,7 +9,7 @@ interface CommandButtonProps {
   onToggleFavorite?: () => void;
 }
 
-export const CommandButton: React.FC<CommandButtonProps> = ({ 
+export const CommandButton: React.FC<CommandButtonProps> = React.memo(({ 
   command, 
   onClick,
   isFavorited = false,
@@ -42,4 +42,6 @@ export const CommandButton: React.FC<CommandButtonProps> = ({
       )}
     </div>
   );
-};
+});
+
+CommandButton.displayName = 'CommandButton';
