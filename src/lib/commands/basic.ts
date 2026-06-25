@@ -3,46 +3,33 @@ import { Command } from './types';
 export const basicCommands: Command[] = [
   {
     id: 'remove-extra-spaces',
-    name: 'Лишние пробелы',
+    name: 'Spaces',
     category: 'basic',
     description: 'Заменяет множественные пробелы и табы на один пробел',
     execute: (text) => text.replace(/[ \t]{2,}/g, ' ')
   },
   {
-    id: 'replace-nbsp',
-    name: 'NBSP',
-    category: 'basic',
-    description: 'Заменяет неразрывные пробелы (\\u00A0) на обычные',
-    execute: (text) => text.replace(/\u00A0/g, ' ')
-  },
-  {
     id: 'trim-lines',
-    name: 'Обрезать края',
+    name: 'Edges',
     category: 'basic',
     description: 'Удаляет пробелы в начале и конце каждой строки',
     execute: (text) => text.split('\n').map(line => line.trim()).join('\n')
   },
   {
     id: 'to-uppercase',
-    name: 'ВЕРХНИЙ',
+    name: 'Upper',
     category: 'basic',
     execute: (text) => text.toUpperCase()
   },
   {
     id: 'to-lowercase',
-    name: 'нижний',
+    name: 'Lower',
     category: 'basic',
     execute: (text) => text.toLowerCase()
   },
   {
-    id: 'to-title-case',
-    name: 'Каждое Слово',
-    category: 'basic',
-    execute: (text) => text.replace(/\b\w/g, char => char.toUpperCase())
-  },
-  {
     id: 'to-sentence-case',
-    name: 'Предложения',
+    name: 'Sentence',
     category: 'basic',
     description: 'Заглавная буква в начале предложений',
     execute: (text) => {
@@ -51,52 +38,51 @@ export const basicCommands: Command[] = [
   },
   {
     id: 'remove-space-before-punctuation',
-    name: 'К знакам',
+    name: ',Space',
     category: 'basic',
     execute: (text) => text.replace(/\s+([.,;:!?])/g, '$1')
   },
   {
     id: 'add-space-after-punctuation',
-    name: 'От знаков',
+    name: 'Space,',
     category: 'basic',
     execute: (text) => text.replace(/([.,;:!?])(\S)/g, '$1 $2')
   },
   {
-    id: 'remove-punctuation',
-    name: 'Без пунктуации',
-    category: 'basic',
-    dangerous: true,
-    execute: (text) => text.replace(/[.,;:!?'"«»()[\]{}\-—–]/g, '')
-  },
-  {
-    id: 'remove-brackets-content',
-    name: 'Без скобок',
-    category: 'basic',
-    dangerous: true,
-    execute: (text) => text.replace(/\([^)]*\)|\[[^\]]*\]/g, '')
-  },
-  {
-    id: 'remove-empty-lines',
-    name: 'Без пустых строк',
+    id: 'line-1',
+    name: 'Line 1',
     category: 'basic',
     execute: (text) => text.replace(/\n\s*\n\s*\n/g, '\n\n')
   },
   {
-    id: 'join-to-one-line',
-    name: 'В одну строку',
+    id: 'line-x',
+    name: 'Line X',
     category: 'basic',
-    execute: (text) => text.replace(/\n+/g, ' ')
+    description: 'Удаляет все пустые строки',
+    execute: (text) => text.split('\n').filter(line => line.trim() !== '').join('\n')
   },
   {
-    id: 'sentence-per-line',
-    name: 'По предложениям',
+    id: 'inline',
+    name: 'Inline',
     category: 'basic',
-    execute: (text) => text.replace(/([.!?])\s+/g, '$1\n')
+    description: 'Склеивает строки внутри блока через пробел, сохраняет разрывы между абзацами',
+    execute: (text) => {
+      return text
+        .split(/\n\n+/)
+        .map(block => block.replace(/\n/g, ' ').trim())
+        .join('\n\n');
+    }
   },
   {
-    id: 'remove-numbering',
-    name: 'Без нумерации',
+    id: 'inline-comma',
+    name: 'Inline ,',
     category: 'basic',
-    execute: (text) => text.replace(/^\s*\d+[.)]\s*/gm, '')
+    description: 'Склеивает строки внутри блока через запятую, сохраняет разрывы между абзацами',
+    execute: (text) => {
+      return text
+        .split(/\n\n+/)
+        .map(block => block.split('\n').map(l => l.trim()).filter(Boolean).join(', '))
+        .join('\n\n');
+    }
   }
 ];
