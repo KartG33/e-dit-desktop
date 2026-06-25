@@ -1,6 +1,6 @@
 Add-Type -AssemblyName System.Drawing
-$sourcePath = "D:\Documents\Antigravity Projects\E-dit\icon.png"
-$outDir = "D:\Documents\Antigravity Projects\E-dit\public\icons"
+$sourcePath = ".\icon.png"
+$outDir = ".\public\icons"
 
 if (-not (Test-Path $outDir)) { 
     New-Item -ItemType Directory -Force -Path $outDir | Out-Null
