@@ -113,6 +113,7 @@ function App() {
             )}
             {activeTab === 'suno' && (
               <SunoCommands 
+                text={activeEditor.text}
                 onCommand={activeEditor.applyCommand} 
                 favoriteCommandIds={favoriteCommandIds}
                 onToggleFavoriteCommand={handleToggleFavoriteCommand}
@@ -155,6 +156,7 @@ function App() {
         isOpen={showPresetsModal}
         onClose={() => setShowPresetsModal(false)}
         onCommand={activeEditor.applyCommand}
+        text={activeEditor.text}
         favoritePresetIds={favoritePresetIds}
         onToggleFavoritePreset={handleToggleFavoritePreset}
       />

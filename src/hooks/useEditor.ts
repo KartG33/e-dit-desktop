@@ -6,7 +6,6 @@ export function useEditor(initialValue = '', editorId = 'main') {
   const [past, setPast] = useState<string[]>([]);
   const [future, setFuture] = useState<string[]>([]);
   
-  const [debouncedText, setDebouncedText] = useState(initialValue);
   const textRef = useRef(initialValue);
   
   const maxHistorySize = 100;
@@ -26,12 +25,10 @@ export function useEditor(initialValue = '', editorId = 'main') {
       const setting = await db.settings.where('key').equals(`editor_${editorId}`).first();
       if (setting && setting.value) {
         setTextState(setting.value);
-        setDebouncedText(setting.value);
         lastSavedTextRef.current = setting.value;
         textRef.current = setting.value;
       } else if (initialValue) {
         setTextState(initialValue);
-        setDebouncedText(initialValue);
         lastSavedTextRef.current = initialValue;
         textRef.current = initialValue;
       }
@@ -40,13 +37,7 @@ export function useEditor(initialValue = '', editorId = 'main') {
     loadSession();
   }, [editorId, initialValue]);
 
-  // Debounce text changes for heavy statistics calculation
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedText(text);
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [text]);
+
 
   // Save to DB on text change
   useEffect(() => {
@@ -126,6 +117,21 @@ export function useEditor(initialValue = '', editorId = 'main') {
     const newText = commandFn(currentText);
     if (newText !== currentText) {
       saveToHistory(currentText);
+      
+      // Save to db.history
+      db.history.add({
+        content: currentText,
+        timestamp: Date.now(),
+        source: 'autosave'
+      }).then(() => {
+        return db.history.orderBy('timestamp').toArray();
+      }).then(history => {
+        if (history.length > 50) {
+          const toDelete = history.slice(0, history.length - 50);
+          return Promise.all(toDelete.map(item => db.history.delete(item.id!)));
+        }
+      }).catch(console.error);
+
       lastSavedTextRef.current = newText;
       setTextState(newText);
       textRef.current = newText;
@@ -133,12 +139,7 @@ export function useEditor(initialValue = '', editorId = 'main') {
   }, [saveToHistory]);
 
   const stats = {
-    chars: text.length,
-    charsNoSpaces: debouncedText.replace(/\s/g, '').length,
-    words: debouncedText.trim() ? debouncedText.trim().split(/\s+/).length : 0,
-    sentences: (debouncedText.match(/[.!?]+/g) || []).length,
-    paragraphs: debouncedText.split(/\n\s*\n/).filter(p => p.trim()).length,
-    lines: debouncedText.split('\n').length
+    chars: text.length
   };
 
   const clear = useCallback(() => {

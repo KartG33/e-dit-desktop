@@ -24,9 +24,23 @@ export const PresetsTab: React.FC<Props> = React.memo(({
   favoritePresetIds = [],
   onToggleFavoritePreset
 }) => {
-  const presets = useLiveQuery(() => db.presets.filter(p => p.type === 'chain').toArray());
+  const presets = useLiveQuery(() => db.presets.toArray());
 
   const handleExecute = (preset: Preset) => {
+    if (preset.type === 'regex') {
+      if (!preset.pattern) return;
+      onCommand((text) => {
+        try {
+          const regex = new RegExp(preset.pattern!, preset.flags || 'g');
+          return text.replace(regex, preset.replacement || '');
+        } catch (e) {
+          console.error('Invalid regex', e);
+          return text;
+        }
+      });
+      return;
+    }
+
     if (!preset.commandIds || !Array.isArray(preset.commandIds)) return;
     
     const allCmds = [...basicCommands, ...sunoCommands, ...symbolCommands];
@@ -58,9 +72,10 @@ export const PresetsTab: React.FC<Props> = React.memo(({
         >
           <button
             onClick={() => handleExecute(preset)}
-            className="text-sm font-medium text-gray-200 hover:text-white mr-1"
-            title={`Применить цепочку: ${preset.commandIds?.map(id => allCommandsMap[id]?.name || id).join(' → ')}`}
+            className="text-sm font-medium text-gray-200 hover:text-white mr-1 flex items-center gap-1.5"
+            title={preset.type === 'regex' ? `Regex: /${preset.pattern}/${preset.flags}` : `Применить цепочку: ${preset.commandIds?.map(id => allCommandsMap[id]?.name || id).join(' → ')}`}
           >
+            {preset.type === 'regex' && <span className="text-[10px] font-mono text-blue-400 border border-blue-400/30 rounded px-1 bg-blue-500/10">/</span>}
             {preset.name}
           </button>
 
